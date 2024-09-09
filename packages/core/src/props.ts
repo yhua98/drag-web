@@ -19,21 +19,23 @@ export function WithProps<T extends Props>(props:Partial<T>, components:Componen
     });
 }
 
-export type DispathType<T extends Props> = { [K in keyof T]: (value: React.SetStateAction<T[K]>) => void };
+export type DispathType<T extends Props> = {
+  [K in (string & keyof T) as `set_${K}`]: (value: React.SetStateAction<T[K]>) => void;
+};
 
 export function useProps<T extends Props>(props: T): [T, DispathType<T>] {
     const [state, setState] = React.useState(props);
-    const dispatch = Object.keys(props).reduce((acc, key: keyof T) => {
-        acc[key] = (value) => {
+    const dispatch = Object.keys(props).reduce((acc:DispathType<T>, key:string & keyof T): DispathType<T> => {
 
+        acc[`set_${key}`] = ((value: React.SetStateAction<T[string & keyof T]>) => {
             if (value instanceof Function) {
                 setState({ ...state, [key]: value(state[key]) });
             } else {
                 setState({ ...state, [key]: value });
             }
+        }) as DispathType<T>[`set_${string & keyof T}`];
 
-        };
         return acc;
-    }, {} as DispathType<T>) as DispathType<T>;
+    }, {} as DispathType<T>);
     return [state, dispatch];
 }

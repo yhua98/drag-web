@@ -9,7 +9,10 @@ export const Text = defineComponent<{ text: string,value:number }>("Text", { tex
 export const Input = defineComponent<{ text: string, value: number }>("Input", { text: "输入内容", value: 0 }, (props, dispatch) => {
     return <div>
         <input type="text" value={props.text} onChange={(e) => {
-            dispatch.text(e.target.value);
+            dispatch.set_text(e.target.value);
+        }} />
+        <input type="number" value={props.value} onChange={(e) => {
+            dispatch.set_value(Number(e.target.value));
         }} />
     </div>;
 })
