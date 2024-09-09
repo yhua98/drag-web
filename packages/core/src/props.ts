@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Component, type Props } from './component';
 
 export function WithProps<T extends Props>(props:Partial<T>, components:Component<T>[]) {
-    const [_props, _setProps] = useState(props);
+    const [_props, _setProps] = useProps(props);
     return components.map((child) => {
         /**
          * 此处需要改造，考虑到组件可能会有多个props，每个props都需要单独的useState，
@@ -12,9 +12,28 @@ export function WithProps<T extends Props>(props:Partial<T>, components:Componen
          * 因此需要考虑部分更新props的问题。
          */
         // @ts-ignore
-        child._props = _props;
+        child._props = { ..._props };
         // @ts-ignore
-        child._setProps = _setProps;
+        child._setProps = { ..._setProps };
         return child
     });
+}
+
+export type DispathType<T extends Props> = { [K in keyof T]: (value: React.SetStateAction<T[K]>) => void };
+
+export function useProps<T extends Props>(props: T): [T, DispathType<T>] {
+    const [state, setState] = React.useState(props);
+    const dispatch = Object.keys(props).reduce((acc, key: keyof T) => {
+        acc[key] = (value) => {
+
+            if (value instanceof Function) {
+                setState({ ...state, [key]: value(state[key]) });
+            } else {
+                setState({ ...state, [key]: value });
+            }
+
+        };
+        return acc;
+    }, {} as DispathType<T>) as DispathType<T>;
+    return [state, dispatch];
 }

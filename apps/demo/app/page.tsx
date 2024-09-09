@@ -1,11 +1,13 @@
 'use client';
 import css from './page.module.css'
-import {useRefsComponent, render, WithProps} from '@lc/core'
+import {render, WithProps} from '@lc/core'
 import { Text, Input,renderProp } from '@lc/components'
 
 export default function Home() {
-  // useRefsComponent([Text, Input]);
-  WithProps({text: '这是共同拥有文本'},[Text, Input]);
+  WithProps({text: '这是共同拥有文本', value:0},[Text, Input]);
+
+  // const [props, dispatch] = useProps({text: '这是共同拥有文本'});
+
   return (
     <div className={css.main}>
       <div className={css['side-nav']}>Nav</div>
